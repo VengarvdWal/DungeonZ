@@ -90,7 +90,8 @@ public class DungeonPlacementHandler {
 
         portalEntity.joinDungeon(serverPlayerEntity.getUuid());
 
-        return new TeleportTarget(dungeonWorld, Vec3d.of(new BlockPos(0, 0, 0).add(portalPos.getX() * 16, 100, portalPos.getZ() * 16)).add(0.5, 0, 0.5), Vec3d.ZERO, 0, 0, TeleportTarget.NO_OP);
+        BlockPos spawnOrigin = portalEntity.resolveOrigin();
+        return new TeleportTarget(dungeonWorld, Vec3d.of(spawnOrigin).add(0.5, 0, 0.5), Vec3d.ZERO, 0, 0, TeleportTarget.NO_OP);
     }
 
     public static TeleportTarget leave(ServerPlayerEntity serverPlayerEntity, ServerWorld serverWorld) {
@@ -254,6 +255,41 @@ public class DungeonPlacementHandler {
 
         // Clean up runtime data file now that dungeon is cleared
         DungeonDataManager.deleteData(world, portalEntity.getPos());
+    }
+
+    /**
+     * Clears all non-air blocks and non-player entities in a single 16x256x16
+     * chunk column. Designed to be called once per server tick by MythicDungeons'
+     * incremental cleanup so the server never freezes clearing an entire slot.
+     */
+    public static void clearChunkColumn(ServerWorld world, int chunkX, int chunkZ) {
+        int blockMinX = chunkX << 4;
+        int blockMinZ = chunkZ << 4;
+        int blockMaxX = blockMinX + 15;
+        int blockMaxZ = blockMinZ + 15;
+
+        world.getChunkManager().addTicket(ChunkTicketType.PORTAL,
+                new ChunkPos(chunkX, chunkZ), 2, new BlockPos(blockMinX, 100, blockMinZ));
+        world.getChunk(chunkX, chunkZ);
+
+        Box columnBox = new Box(blockMinX, 0, blockMinZ, blockMaxX + 1, 257, blockMaxZ + 1);
+        clearEntitiesInArea(world, columnBox);
+
+        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        for (int y = 256; y >= 0; y--) {
+            for (int x = blockMinX; x <= blockMaxX; x++) {
+                for (int z = blockMinZ; z <= blockMaxZ; z++) {
+                    mutable.set(x, y, z);
+                    BlockState state = world.getBlockState(mutable);
+                    if (!state.isAir()) {
+                        BlockEntity be = world.getBlockEntity(mutable);
+                        if (be != null) world.removeBlockEntity(mutable);
+                        world.setBlockState(mutable, Blocks.AIR.getDefaultState(),
+                                Block.FORCE_STATE | Block.SKIP_DROPS);
+                    }
+                }
+            }
+        }
     }
 
     // Clear a 512x256x512 area centered on X/Z, from Y=0 to Y=256

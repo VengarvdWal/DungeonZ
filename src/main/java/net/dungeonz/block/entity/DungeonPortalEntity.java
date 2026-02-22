@@ -58,6 +58,44 @@ public class DungeonPortalEntity extends EndPortalBlockEntity implements Extende
     private String difficulty = "";
     private boolean dungeonStructureGenerated = false;
     private List<UUID> dungeonPlayerUuids = new ArrayList<UUID>();
+
+    /**
+     * When non-null, overrides the default origin calculation in
+     * {@link #startDungeonTeleportCountdown} and
+     * {@link net.dungeonz.dungeon.DungeonPlacementHandler#enter}.
+     * Set by MythicDungeons before triggering the countdown to redirect
+     * structure generation to an instanced slot.
+     * Cleared after each use so non-Mythic+ runs are unaffected.
+     */
+    @Nullable
+    private BlockPos instanceOrigin = null;
+
+    /**
+     * Optional callback fired at the very start of
+     * {@link #startDungeonTeleportCountdown} — before the origin is resolved
+     * and before any generation happens.
+     *
+     * MythicDungeons registers here to create the RunInstance and call
+     * {@link #setInstanceOrigin} at exactly the right moment.
+     * Set to {@code null} (default) to disable.
+     */
+    @Nullable
+    public static java.util.function.Consumer<DungeonPortalEntity> onCountdownStart = null;
+
+    @Nullable
+    public BlockPos getInstanceOrigin() {
+        return instanceOrigin;
+    }
+
+    public void setInstanceOrigin(@Nullable BlockPos pos) {
+        this.instanceOrigin = pos;
+    }
+
+    /** Returns the origin to use for generation/teleportation — slot origin if set, portal-based default otherwise. */
+    public BlockPos resolveOrigin() {
+        if (instanceOrigin != null) return instanceOrigin;
+        return new BlockPos(0, 0, 0).add(this.getPos().getX() * 16, 100, this.getPos().getZ() * 16);
+    }
     private List<UUID> deadDungeonPlayerUuids = new ArrayList<UUID>();
     private int maxGroupSize = 0;
     private int minGroupSize = 0;
@@ -831,8 +869,22 @@ public class DungeonPortalEntity extends EndPortalBlockEntity implements Extende
     public void startDungeonTeleportCountdown(ServerWorld dungeonWorld) {
         this.dungeonTeleportCountdown = ConfigInit.CONFIG.defaultDungeonTeleportCountdown;
 
+        // Fire the MythicDungeons hook first — it creates the RunInstance and
+        // sets instanceOrigin so resolveOrigin() returns the right slot position.
+        if (onCountdownStart != null) {
+            onCountdownStart.accept(this);
+        }
+
+        BlockPos origin = this.resolveOrigin();
+
+        // When an instance origin is set (Mythic+ run), always regenerate fresh.
+        // Reset flags and stale bounding-box data so we always hit the generation branch.
+        if (this.instanceOrigin != null) {
+            this.dungeonStructureGenerated = false;
+            this.getDungeonEdgeList().clear();
+        }
+
         boolean isDungeonStructureGenerated = this.isDungeonStructureGenerated();
-        BlockPos origin = new BlockPos(0, 0, 0).add(this.getPos().getX() * 16, 100, this.getPos().getZ() * 16);
 
         if (!isDungeonStructureGenerated) {
             this.setDungeonStructureGenerated();
