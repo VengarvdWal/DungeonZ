@@ -56,6 +56,20 @@
             "boss_protection_modificator": 10.0,
             "boss_speed_modificator": 1.30,
             "boss_loot_table_id": "dungeonz:chests/temple_dungeon_extreme_boss_loot"
+        },
+        "mythic": {
+            "mob_health_modificator": 30.0,
+            "mob_damage_modificator": 30.0,
+            "mob_protection_modificator": 30.0,
+            "mob_speed_modificator": 1.45,
+            "loot_table_ids": [
+                "dungeonz:chests/temple_dungeon_extreme_tier_chest_loot"
+            ],
+            "boss_health_modificator": 50.0,
+            "boss_damage_modificator": 15.0,
+            "boss_protection_modificator": 20.0,
+            "boss_speed_modificator": 1.45,
+            "boss_loot_table_id": "dungeonz:chests/temple_dungeon_extreme_boss_loot"
         }
     },
     "blocks": {
@@ -67,7 +81,8 @@
                 "easy": 0.3,
                 "normal": 0.6,
                 "hard": 0.7,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -80,7 +95,8 @@
                 "easy": 0.3,
                 "normal": 0.6,
                 "hard": 0.7,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -93,7 +109,8 @@
                 "easy": 0.1,
                 "normal": 0.3,
                 "hard": 0.6,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -106,7 +123,8 @@
                 "easy": 0.05,
                 "normal": 0.4,
                 "hard": 0.75,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -119,7 +137,8 @@
                 "easy": 0.1,
                 "normal": 0.3,
                 "hard": 0.7,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -132,7 +151,8 @@
                 "easy": 0.01,
                 "normal": 0.25,
                 "hard": 0.5,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -145,7 +165,8 @@
                 "easy": 0.05,
                 "normal": 0.2,
                 "hard": 0.4,
-                "extreme": 0.8
+                "extreme": 0.8,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -158,7 +179,8 @@
                 "easy": 0,
                 "normal": 0.2,
                 "hard": 0.4,
-                "extreme": 0.8
+                "extreme": 0.8,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -171,7 +193,8 @@
                 "easy": 0.1,
                 "normal": 0.3,
                 "hard": 0.6,
-                "extreme": 1
+                "extreme": 1,
+                "mythic": 1
             },
             "replace": "minecraft:air"
         },
@@ -208,7 +231,8 @@
         },
         "extreme": {
             "minecraft:diamond": 10
-        }
+        },
+        "mythic": {}
     },
     "respawn":true,
     "elytra": false,
